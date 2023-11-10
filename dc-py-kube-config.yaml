@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: py-docker-cicd
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: flask
+  template:
+    metadata:
+      labels:
+        service: flask
+    spec:
+      containers:
+       - name: flask-service
+         image: viciwuoha/py-docker-cicd:multi
+         imagePullPolicy: Always
+         env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-passwd
+                key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-entrypoint
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    service: flask
+  ports:
+  - port: 5001
+    targetPort: 5001
+    nodePort: 30001
